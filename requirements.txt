@@ -10,3 +10,4 @@ html2text>=2020.1.16          # HTML to text conversion (sometimes used by tools
 pydantic>=1.10,<2.0           # Data validation (Langchain often needs V1 for now)
 google-cloud-aiplatform>=1.38.1 # Dependency for langchain-google-genai
 nest_asyncio>=1.5.8           # To run async Langchain/Selenium in FastAPI sync endpoint if needed
+Jinja2>=3.0.0
