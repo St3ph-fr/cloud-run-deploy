@@ -22,13 +22,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Step 2.2: Download and install Google Chrome stable
-RUN wget -q -O /tmp/google-chrome-stable_current_amd64.deb \
-    https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+# Removed -q from wget for better debugging output
+RUN echo "Downloading Google Chrome..." \
+    && wget --progress=dot:giga -O /tmp/google-chrome-stable_current_amd64.deb \
+       https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && echo "Installing Google Chrome package (dpkg)..." \
     && dpkg -i /tmp/google-chrome-stable_current_amd64.deb \
-    # The command below installs dependencies Chrome needs, -f fixes broken dependencies
+    && echo "Updating package lists before fixing dependencies..." \
+    && apt-get update \
+    && echo "Fixing potential Chrome dependencies (apt-get -f install)..." \
     && apt-get install -f -y --no-install-recommends \
+    && echo "Cleaning up apt lists and downloaded Chrome package..." \
     && rm -rf /var/lib/apt/lists/* \
-    && rm /tmp/google-chrome-stable_current_amd64.deb
+    && rm /tmp/google-chrome-stable_current_amd64.deb \
+    && echo "Chrome installation step finished."
 
 # Step 2.3: Install ChromeDriver matching the installed Chrome version
 RUN CHROME_MAJOR_VERSION=$(google-chrome-stable --version | sed 's/Google Chrome \([0-9]*\)\..*/\1/') \
@@ -37,15 +44,21 @@ RUN CHROME_MAJOR_VERSION=$(google-chrome-stable --version | sed 's/Google Chrome
     && CHROME_DRIVER_VERSION=$(wget -qO- "https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build.json" | grep "\"${CHROME_MAJOR_VERSION}\." | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)".*/\1/') \
     && echo "Attempting to download ChromeDriver version: $CHROME_DRIVER_VERSION" \
     && if [ -z "$CHROME_DRIVER_VERSION" ]; then echo "Error: Could not automatically determine ChromeDriver version."; exit 1; fi \
-    && wget -q --continue -P /tmp "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" \
+    && echo "Downloading ChromeDriver..." \
+    && wget --progress=dot:giga -O /tmp/chromedriver-linux64.zip "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" \
+    && echo "Unzipping ChromeDriver..." \
     && unzip -q /tmp/chromedriver-linux64.zip -d /tmp \
     # Move chromedriver to /usr/local/bin
+    && echo "Moving ChromeDriver to /usr/local/bin..." \
     && mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
     # Clean up temp files/dirs
+    && echo "Cleaning up ChromeDriver temp files..." \
     && rm /tmp/chromedriver-linux64.zip \
     && rm -rf /tmp/chromedriver-linux64 \
     # Make chromedriver executable
-    && chmod +x /usr/local/bin/chromedriver
+    && echo "Making ChromeDriver executable..." \
+    && chmod +x /usr/local/bin/chromedriver \
+    && echo "ChromeDriver installation finished."
 
 # Set Chrome path (optional, often auto-detected but good for clarity)
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
@@ -58,7 +71,9 @@ WORKDIR /app
 # 4. Install Python dependencies
 COPY requirements.txt ./
 # Add --verbose flag to pip install for more detailed output if needed
-RUN pip install --no-cache-dir -r requirements.txt --verbose
+RUN echo "Installing Python dependencies from requirements.txt..." \
+    && pip install --no-cache-dir -r requirements.txt --verbose \
+    && echo "Python dependencies installed."
 
 # 5. Copy application code
 COPY . .
