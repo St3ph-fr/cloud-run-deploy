@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN echo "Downloading Google Chrome..." \
     && wget --progress=dot:giga -O /tmp/google-chrome-stable_current_amd64.deb \
        https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && echo "Installing Google Chrome package (dpkg)..." \
-    && dpkg -i /tmp/google-chrome-stable_current_amd64.deb \
+    && echo "Installing Google Chrome package (dpkg)... (Ignoring potential dependency errors here)" \
+    && (dpkg -i /tmp/google-chrome-stable_current_amd64.deb || true) \ 
     && echo "Updating package lists before fixing dependencies..." \
     && apt-get update \
     && echo "Fixing potential Chrome dependencies (apt-get -f install)..." \
