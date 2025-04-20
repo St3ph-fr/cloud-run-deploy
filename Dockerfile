@@ -79,5 +79,5 @@ COPY . .
 # 6. Expose the port the app runs on
 EXPOSE ${PORT}
 
-# 7. Define the command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT}", "--workers", "1"]
+# 7. Define the command to run the application (using shell form for env var substitution)
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT} --workers 1
