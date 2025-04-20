@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain Browser Agent</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; }
+        #queryForm { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; }
+        textarea { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; min-height: 80px;}
+        button { padding: 10px 15px; cursor: pointer; }
+        h2 { margin-top: 30px; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        #logOutput, #resultOutput {
+            background-color: #f4f4f4;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap; /* Preserve whitespace and newlines */
+            word-wrap: break-word; /* Break long words */
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #resultOutput { background-color: #e6f7ff; }
+        .loading { font-style: italic; color: #555; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>LangChain Browser Agent Interface</h1>
+    <p>Enter a query for the agent to perform using a web browser.</p>
+    <p><strong>Example:</strong> "What is the weather in London today according to bbc.co.uk/weather?"</p>
+    <p><strong>Warning:</strong> This tool interacts with the live web based on your query. Use with caution.</p>
+
+    <form id="queryForm">
+        <label for="queryInput">Your Query:</label>
+        <textarea id="queryInput" name="query" required></textarea>
+        <button type="submit" id="submitButton">Run Agent</button>
+    </form>
+
+    <h2>Action Log:</h2>
+    <div id="logOutput">Logs will appear here...</div>
+
+    <h2>Final Answer:</h2>
+    <div id="resultOutput">The final answer from the agent will appear here...</div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
