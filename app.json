@@ -5,27 +5,18 @@
   "env": {
     "GOOGLE_API_KEY": {
       "description": "Your Google API Key for Gemini API (Google AI Studio). Required for LLM calls.",
-      "value": "", // Leave empty - User MUST provide this during deployment setup.
+      "value": "",
       "required": true
     }
-    // Add other environment variables here if needed in the future
-    // Example:
-    // "LOG_LEVEL": {
-    //   "description": "Set the application log level (e.g., INFO, DEBUG).",
-    //   "value": "INFO",
-    //   "required": false
-    // }
   },
   "options": {
-    "allow-unauthenticated": true, // WARNING: Allows public access. Change to false and configure IAM/IAP for production.
-    "memory": "1Gi",         // Minimum recommended memory due to Chrome usage. Adjust as needed.
-    "cpu": "1",               // Starting CPU allocation. Monitor and adjust.
-    "region": "us-central1",  // Optional: Suggest a default region. User can override.
-    "timeoutSeconds": 300     // Optional: Increase request timeout for potentially long browser tasks (default is 300).
+    "allow-unauthenticated": true,
+    "memory": "1Gi",       
+    "cpu": "1",             
+    "region": "us-central1", 
+    "timeoutSeconds": 300   
   },
   "build": {
-    // Cloud Build will automatically detect and use the Dockerfile in the root.
-    // No specific buildpack settings are needed here when a Dockerfile is present.
-    "skip": false // Ensures the build step is not skipped
+    "skip": false 
   }
 }
