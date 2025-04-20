@@ -1,0 +1,12 @@
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.2      # ASGI server with performance extras
+python-dotenv>=1.0.0          # For loading .env files locally
+langchain>=0.1.0             # Core LangChain library
+langchain-google-genai>=0.0.6 # Google GenAI integration
+selenium>=4.10.0              # Browser automation driver
+beautifulsoup4>=4.12.0        # HTML parsing (often needed by browser tools)
+html2text>=2020.1.16          # HTML to text conversion (sometimes used by tools)
+# pydantic is usually a dependency of fastapi/langchain, listed for clarity
+pydantic>=1.10,<2.0           # Data validation (Langchain often needs V1 for now)
+google-cloud-aiplatform>=1.38.1 # Dependency for langchain-google-genai
+nest_asyncio>=1.5.8           # To run async Langchain/Selenium in FastAPI sync endpoint if needed
