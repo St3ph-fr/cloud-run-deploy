@@ -7,42 +7,58 @@ ENV PYTHONUNBUFFERED=1 \
     GOOGLE_API_KEY="" \
     DEBIAN_FRONTEND=noninteractive
 
-# 2. Install OS dependencies for Chrome and ChromeDriver
+# 2. Install OS dependencies
+# Step 2.1: Update apt cache and install essential tools + common Chrome deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
-    gnupg \
     unzip \
-    # Add Google Chrome's repo key and repo
-    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
-    # Install Chrome
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    # --- Install ChromeDriver ---
-    # Get the latest stable ChromeDriver version matching Chrome stable
-    && CHROME_DRIVER_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$(google-chrome-stable --version | sed 's/.*Google Chrome \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')) \
-    && echo "Using ChromeDriver version: $CHROME_DRIVER_VERSION" \
-    && wget -q --continue -P /tmp https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip \
-    && unzip -q /tmp/chromedriver_linux64.zip -d /usr/local/bin \
-    && rm /tmp/chromedriver_linux64.zip \
+    ca-certificates \
+    fonts-liberation \
+    libnss3 \
+    # Add other common dependencies if needed, but start minimal
+    # Example: libu2f-udev libvulkan1 added based on some recommendations
+    # libu2f-udev \
+    # libvulkan1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Step 2.2: Download and install Google Chrome stable
+RUN wget -q -O /tmp/google-chrome-stable_current_amd64.deb \
+    https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && dpkg -i /tmp/google-chrome-stable_current_amd64.deb \
+    # The command below installs dependencies Chrome needs, -f fixes broken dependencies
+    && apt-get install -f -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /tmp/google-chrome-stable_current_amd64.deb
+
+# Step 2.3: Install ChromeDriver matching the installed Chrome version
+RUN CHROME_MAJOR_VERSION=$(google-chrome-stable --version | sed 's/Google Chrome \([0-9]*\)\..*/\1/') \
+    && echo "Detected Chrome major version: $CHROME_MAJOR_VERSION" \
+    # Find the latest chromedriver version for the detected major Chrome version
+    && CHROME_DRIVER_VERSION=$(wget -qO- "https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build.json" | grep "\"${CHROME_MAJOR_VERSION}\." | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)".*/\1/') \
+    && echo "Attempting to download ChromeDriver version: $CHROME_DRIVER_VERSION" \
+    && if [ -z "$CHROME_DRIVER_VERSION" ]; then echo "Error: Could not automatically determine ChromeDriver version."; exit 1; fi \
+    && wget -q --continue -P /tmp "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" \
+    && unzip -q /tmp/chromedriver-linux64.zip -d /tmp \
+    # Move chromedriver to /usr/local/bin
+    && mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
+    # Clean up temp files/dirs
+    && rm /tmp/chromedriver-linux64.zip \
+    && rm -rf /tmp/chromedriver-linux64 \
     # Make chromedriver executable
-    && chmod +x /usr/local/bin/chromedriver \
-    # --- Cleanup ---
-    && apt-get purge -y --auto-remove wget unzip gnupg \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/google-chrome.list
+    && chmod +x /usr/local/bin/chromedriver
 
 # Set Chrome path (optional, often auto-detected but good for clarity)
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
-# Point Selenium to the driver if needed, though PATH should work  
-ENV CHROME_DRIVER_PATH=/usr/local/bin/chromedriver                
+# Point Selenium to the driver if needed, though PATH should work
+ENV CHROME_DRIVER_PATH=/usr/local/bin/chromedriver
 
 # 3. Set up the working directory
 WORKDIR /app
 
 # 4. Install Python dependencies
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Add --verbose flag to pip install for more detailed output if needed
+RUN pip install --no-cache-dir -r requirements.txt --verbose
 
 # 5. Copy application code
 COPY . .
