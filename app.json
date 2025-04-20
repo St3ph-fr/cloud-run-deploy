@@ -13,7 +13,6 @@
     "allow-unauthenticated": true,
     "memory": "1Gi",       
     "cpu": "1",             
-    "timeoutSeconds": 300   
   },
   "build": {
     "skip": false 
