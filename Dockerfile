@@ -34,8 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Set Chrome path (optional, often auto-detected but good for clarity)
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
-# Point Selenium to the driver if needed, though PATH should work  <-- MOVED COMMENT HERE
-ENV CHROME_DRIVER_PATH=/usr/local/bin/chromedriver                 <-- ENV instruction without comment
+# Point Selenium to the driver if needed, though PATH should work  
+ENV CHROME_DRIVER_PATH=/usr/local/bin/chromedriver                
 
 # 3. Set up the working directory
 WORKDIR /app
